@@ -38,89 +38,62 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
   const exportPDF = async () => {
     if (!printRef.current) return;
     
-    // Force print mode for export
-    const wasPrintMode = isPrintMode;
-    if (!wasPrintMode) setIsPrintMode(true);
-    
-    // Small delay to allow re-render if mode changed
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
     setIsExporting('pdf');
+    const wasPrintMode = isPrintMode;
+    setIsPrintMode(true);
+    
+    // Allow time for state update and layout shift
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
     try {
-      const canvas = await html2canvas(printRef.current, {
-        scale: 3, // Higher scale for better resolution
+      const element = printRef.current;
+      const canvas = await html2canvas(element, {
+        scale: 2,
         useCORS: true,
         backgroundColor: '#ffffff',
-        logging: false,
-        onclone: (clonedDoc) => {
-          const el = clonedDoc.getElementById('invoice-preview');
-          if (el) {
-            el.style.height = 'auto';
-            el.style.minHeight = '0';
-          }
-        }
+        windowWidth: 800, // Force a consistent width for capture
       });
       
-      const imgData = canvas.toDataURL('image/png', 1.0);
+      const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
-        compress: true
       });
       
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgProps = pdf.getImageProperties(imgData);
-      const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      const imgWidth = pdfWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      // Add first page
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight, undefined, 'FAST');
-      heightLeft -= pdfHeight;
-
-      // Add extra pages if the content is longer than one A4 page
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight, undefined, 'FAST');
-        heightLeft -= pdfHeight;
-      }
-
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
       pdf.save(`${doc.number}.pdf`);
     } catch (error) {
       console.error('PDF Export failed:', error);
     } finally {
       setIsExporting(null);
-      if (!wasPrintMode) setIsPrintMode(false);
+      setIsPrintMode(wasPrintMode);
     }
   };
 
   const exportPNG = async () => {
     if (!printRef.current) return;
     
-    const wasPrintMode = isPrintMode;
-    if (!wasPrintMode) setIsPrintMode(true);
-    
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
     setIsExporting('png');
+    const wasPrintMode = isPrintMode;
+    setIsPrintMode(true);
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
     try {
-      const canvas = await html2canvas(printRef.current, {
-        scale: 4, // Very high resolution for PNG
+      const element = printRef.current;
+      const canvas = await html2canvas(element, {
+        scale: 3,
         useCORS: true,
         backgroundColor: '#ffffff',
-        logging: false,
-        onclone: (clonedDoc) => {
-          const el = clonedDoc.getElementById('invoice-preview');
-          if (el) {
-            el.style.height = 'auto';
-            el.style.minHeight = '0';
-          }
-        }
+        windowWidth: 800,
       });
+      
       const link = document.createElement('a');
       link.download = `${doc.number}.png`;
       link.href = canvas.toDataURL('image/png', 1.0);
@@ -129,7 +102,7 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
       console.error('PNG Export failed:', error);
     } finally {
       setIsExporting(null);
-      if (!wasPrintMode) setIsPrintMode(false);
+      setIsPrintMode(wasPrintMode);
     }
   };
 
@@ -214,20 +187,20 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
                 id="invoice-preview"
                 ref={printRef}
                 className={cn(
-                  "transition-all duration-500 w-full flex flex-col",
+                  "transition-all duration-300 flex flex-col mx-auto",
                   isPrintMode 
-                    ? "bg-white text-slate-900 p-12" 
-                    : "bg-white/[0.02] text-white border border-white/[0.08] p-8 md:p-16 rounded-[3rem] shadow-2xl min-h-[1123px] backdrop-blur-3xl"
+                    ? "bg-white text-slate-900 p-12 w-[800px] min-h-[1123px]" 
+                    : "bg-white/[0.02] text-white border border-white/[0.08] p-8 md:p-16 rounded-[3rem] shadow-2xl min-h-[1123px] backdrop-blur-3xl w-full"
                 )}
               >
             {/* Header */}
-            <div className="flex justify-between items-start mb-20">
-              <div>
+            <div className="flex justify-between items-start mb-16">
+              <div className="flex-1">
                 <div className={cn(
-                  "w-24 h-24 rounded-[2rem] flex items-center justify-center mb-8 shadow-2xl",
+                  "w-20 h-20 rounded-2xl flex items-center justify-center mb-6 shadow-xl",
                   isPrintMode ? "bg-blue-600 text-white" : "bg-white/[0.03] text-white border border-white/[0.08] backdrop-blur-xl"
                 )}>
-                  <FileText size={48} />
+                  <FileText size={40} />
                 </div>
                 <h1 className="text-4xl font-black uppercase tracking-tighter mb-1">{doc.type}</h1>
                 <p className={cn(
@@ -235,7 +208,7 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
                   isPrintMode ? "text-slate-400" : "text-slate-500"
                 )}>#{doc.number}</p>
               </div>
-              <div className="text-right">
+              <div className="text-right flex-1">
                 <h2 className="text-2xl font-black mb-2">{doc.company.name}</h2>
                 <div className={cn(
                   "text-sm space-y-1",
@@ -249,7 +222,7 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
             </div>
 
             {/* Info Grid */}
-            <div className="grid grid-cols-2 gap-12 mb-20">
+            <div className="grid grid-cols-2 gap-12 mb-16">
               <div>
                 <p className={cn(
                   "text-[11px] font-black uppercase tracking-[0.2em] mb-4",
@@ -264,7 +237,7 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
                   <p>{doc.client.email}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-y-8 gap-x-4">
+              <div className="grid grid-cols-2 gap-y-6 gap-x-4">
                 <div>
                   <p className={cn(
                     "text-[11px] font-black uppercase tracking-[0.2em] mb-1",
@@ -294,26 +267,26 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
 
             {/* Items Table */}
             <div className="flex-1">
-              <table className="w-full mb-12">
+              <table className="w-full mb-12 border-collapse">
                 <thead>
                   <tr className={cn(
                     "border-b-2",
                     isPrintMode ? "border-slate-100" : "border-white/5"
                   )}>
                     <th className={cn(
-                      "py-5 text-left text-[11px] font-black uppercase tracking-[0.2em]",
+                      "py-4 text-left text-[10px] font-black uppercase tracking-[0.2em]",
                       isPrintMode ? "text-slate-400" : "text-slate-500"
                     )}>Description</th>
                     <th className={cn(
-                      "py-5 text-center text-[11px] font-black uppercase tracking-[0.2em] w-24",
+                      "py-4 text-center text-[10px] font-black uppercase tracking-[0.2em] w-20",
                       isPrintMode ? "text-slate-400" : "text-slate-500"
                     )}>Qty</th>
                     <th className={cn(
-                      "py-5 text-right text-[11px] font-black uppercase tracking-[0.2em] w-32",
+                      "py-4 text-right text-[10px] font-black uppercase tracking-[0.2em] w-32",
                       isPrintMode ? "text-slate-400" : "text-slate-500"
                     )}>Price</th>
                     <th className={cn(
-                      "py-5 text-right text-[11px] font-black uppercase tracking-[0.2em] w-32",
+                      "py-4 text-right text-[10px] font-black uppercase tracking-[0.2em] w-32",
                       isPrintMode ? "text-slate-400" : "text-slate-500"
                     )}>Total</th>
                   </tr>
@@ -324,10 +297,10 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
                 )}>
                   {doc.items.map((item) => (
                     <tr key={item.id}>
-                      <td className="py-8 text-base font-bold">{item.description}</td>
-                      <td className="py-8 text-base text-center">{item.quantity}</td>
-                      <td className="py-8 text-base text-right">{formatCurrency(item.price)}</td>
-                      <td className="py-8 text-base font-black text-right">{formatCurrency(item.quantity * item.price)}</td>
+                      <td className="py-6 text-sm font-bold">{item.description}</td>
+                      <td className="py-6 text-sm text-center">{item.quantity}</td>
+                      <td className="py-6 text-sm text-right">{formatCurrency(item.price)}</td>
+                      <td className="py-6 text-sm font-black text-right">{formatCurrency(item.quantity * item.price)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -335,23 +308,23 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
             </div>
 
             {/* Totals */}
-            <div className="flex justify-end mb-20">
-              <div className="w-80 space-y-4">
-                <div className="flex justify-between text-base">
+            <div className="flex justify-end mb-16">
+              <div className="w-72 space-y-3">
+                <div className="flex justify-between text-sm">
                   <span className={isPrintMode ? "text-slate-500" : "text-slate-400"}>Subtotal</span>
                   <span className="font-bold">{formatCurrency(doc.subtotal)}</span>
                 </div>
-                <div className="flex justify-between text-base">
+                <div className="flex justify-between text-sm">
                   <span className={isPrintMode ? "text-slate-500" : "text-slate-400"}>Tax ({doc.taxRate}%)</span>
                   <span className="font-bold">{formatCurrency(doc.taxAmount)}</span>
                 </div>
                 <div className={cn(
-                  "flex justify-between items-end pt-6 border-t-4",
+                  "flex justify-between items-center pt-4 border-t-2 mt-2",
                   isPrintMode ? "border-blue-600" : "border-blue-500"
                 )}>
-                  <span className="text-sm font-black uppercase tracking-[0.2em]">Total Amount</span>
+                  <span className="text-xs font-black uppercase tracking-[0.1em]">Total Amount</span>
                   <span className={cn(
-                    "text-4xl font-black",
+                    "text-2xl font-black",
                     isPrintMode ? "text-blue-600" : "text-blue-400"
                   )}>{formatCurrency(doc.total)}</span>
                 </div>
