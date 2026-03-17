@@ -82,22 +82,22 @@ export default function Dashboard({
   return (
     <div className="space-y-8">
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {stats.map((stat) => (
           <button 
             key={stat.id} 
             onClick={() => onFilter?.(stat.id as any)}
             className={cn(
-              "glass-card p-6 flex items-center gap-4 text-left transition-all hover:scale-[1.02] active:scale-[0.98] rounded-[2.5rem]",
+              "glass-card p-4 sm:p-6 flex items-center gap-3 sm:gap-4 text-left transition-all hover:scale-[1.02] active:scale-[0.98] rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden min-w-0",
               activeFilter === stat.id ? "ring-2 ring-white/20 bg-white/[0.08]" : "hover:bg-white/[0.04]"
             )}
           >
-            <div className={cn("p-4 rounded-full bg-white/[0.03] border border-white/[0.05]", stat.color)}>
-              <stat.icon size={24} />
+            <div className={cn("p-3 sm:p-4 rounded-full bg-white/[0.03] border border-white/[0.05] shrink-0", stat.color)}>
+              <stat.icon size={20} className="sm:w-6 sm:h-6" />
             </div>
-            <div>
-              <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">{stat.label}</p>
-              <p className="text-2xl font-bold">{stat.value}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-[9px] sm:text-[10px] text-slate-500 font-black uppercase tracking-widest truncate">{stat.label}</p>
+              <p className="text-lg sm:text-2xl font-bold truncate leading-tight">{stat.value}</p>
             </div>
           </button>
         ))}

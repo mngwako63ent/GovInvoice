@@ -48,12 +48,12 @@
   }
 
   .glass-button {
-    @apply bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.12] rounded-full px-8 py-3 transition-all active:scale-95 disabled:opacity-50 font-medium tracking-wide flex items-center justify-center gap-2;
+    @apply bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.12] rounded-full px-4 sm:px-8 py-3 transition-all active:scale-95 disabled:opacity-50 font-medium tracking-wide flex items-center justify-center gap-2 whitespace-nowrap overflow-hidden text-ellipsis;
     backdrop-filter: blur(12px);
   }
 
   .glass-button-primary {
-    @apply bg-white/[0.1] hover:bg-white/[0.15] border border-white/[0.2] rounded-full px-8 py-3 transition-all active:scale-95 shadow-xl font-bold tracking-wide flex items-center justify-center gap-2;
+    @apply bg-white/[0.1] hover:bg-white/[0.15] border border-white/[0.2] rounded-full px-4 sm:px-8 py-3 transition-all active:scale-95 shadow-xl font-bold tracking-wide flex items-center justify-center gap-2 whitespace-nowrap overflow-hidden text-ellipsis;
     backdrop-filter: blur(16px);
   }
 

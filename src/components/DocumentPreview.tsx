@@ -43,7 +43,7 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
     setIsPrintMode(true);
     
     // Allow time for state update and layout shift
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 800));
     
     try {
       const element = printRef.current;
@@ -51,22 +51,27 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
         scale: 2,
         useCORS: true,
         backgroundColor: '#ffffff',
-        windowWidth: 800, // Force a consistent width for capture
+        width: 794,
+        height: 1123,
+        scrollX: 0,
+        scrollY: -window.scrollY,
+        windowWidth: 794,
+        windowHeight: 1123
       });
       
-      const imgData = canvas.toDataURL('image/png');
+      const imgData = canvas.toDataURL('image/png', 1.0);
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
+        compress: true
       });
       
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = pdfWidth;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      // Force fit to A4 page
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
       pdf.save(`${doc.number}.pdf`);
     } catch (error) {
       console.error('PDF Export failed:', error);
@@ -83,7 +88,7 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
     const wasPrintMode = isPrintMode;
     setIsPrintMode(true);
     
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 800));
     
     try {
       const element = printRef.current;
@@ -91,7 +96,12 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
         scale: 3,
         useCORS: true,
         backgroundColor: '#ffffff',
-        windowWidth: 800,
+        width: 794,
+        height: 1123,
+        scrollX: 0,
+        scrollY: -window.scrollY,
+        windowWidth: 794,
+        windowHeight: 1123
       });
       
       const link = document.createElement('a');
@@ -108,6 +118,27 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-20">
+      {/* Print Styles Injection */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          body * { visibility: hidden; }
+          #invoice-preview, #invoice-preview * { visibility: visible; }
+          #invoice-preview {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 210mm !important;
+            height: 297mm !important;
+            padding: 15mm !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+            background: white !important;
+            color: black !important;
+          }
+        }
+      `}} />
+
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4 w-full sm:w-auto">
           <button onClick={onBack} className="glass-button flex items-center gap-2 px-4">
@@ -182,14 +213,14 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Document Preview Container */}
         <div className="lg:col-span-3 overflow-x-auto pb-4">
-          <div className="min-w-[800px] lg:min-w-0">
+          <div className="flex justify-center">
               <div 
                 id="invoice-preview"
                 ref={printRef}
                 className={cn(
-                  "transition-all duration-300 flex flex-col mx-auto",
+                  "transition-all duration-300 flex flex-col shrink-0",
                   isPrintMode 
-                    ? "bg-white text-slate-900 p-12 w-[800px] min-h-[1123px]" 
+                    ? "bg-white text-slate-900 p-10 w-[794px] h-[1123px] shadow-none rounded-none overflow-hidden" 
                     : "bg-white/[0.02] text-white border border-white/[0.08] p-8 md:p-16 rounded-[3rem] shadow-2xl min-h-[1123px] backdrop-blur-3xl w-full"
                 )}
               >
