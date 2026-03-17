@@ -42,8 +42,12 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
     const wasPrintMode = isPrintMode;
     setIsPrintMode(true);
     
+    // Force scroll to top to prevent cropping issues with html2canvas
+    const scrollPos = window.scrollY;
+    window.scrollTo(0, 0);
+    
     // Allow time for state update and layout shift
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     try {
       const element = printRef.current;
@@ -51,12 +55,24 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
         scale: 2,
         useCORS: true,
         backgroundColor: '#ffffff',
-        width: element.offsetWidth,
-        height: element.offsetHeight,
+        width: 794,
+        height: 1123,
+        windowWidth: 794,
+        windowHeight: 1123,
+        x: 0,
+        y: 0,
         scrollX: 0,
-        scrollY: -window.scrollY,
-        windowWidth: element.offsetWidth,
-        windowHeight: element.offsetHeight
+        scrollY: 0,
+        onclone: (clonedDoc) => {
+          const clonedElement = clonedDoc.getElementById('invoice-preview');
+          if (clonedElement) {
+            clonedElement.style.width = '794px';
+            clonedElement.style.height = '1123px';
+            clonedElement.style.padding = '40px';
+            clonedElement.style.margin = '0';
+            clonedElement.style.boxShadow = 'none';
+          }
+        }
       });
       
       const imgData = canvas.toDataURL('image/png', 1.0);
@@ -67,15 +83,16 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
         compress: true
       });
       
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
+      // A4 dimensions in mm
+      const pdfWidth = 210;
+      const pdfHeight = 297;
       
-      // Force fit to A4 page
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
       pdf.save(`${doc.number}.pdf`);
     } catch (error) {
       console.error('PDF Export failed:', error);
     } finally {
+      window.scrollTo(0, scrollPos);
       setIsExporting(null);
       setIsPrintMode(wasPrintMode);
     }
@@ -88,7 +105,10 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
     const wasPrintMode = isPrintMode;
     setIsPrintMode(true);
     
-    await new Promise(resolve => setTimeout(resolve, 800));
+    const scrollPos = window.scrollY;
+    window.scrollTo(0, 0);
+    
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     try {
       const element = printRef.current;
@@ -96,12 +116,23 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
         scale: 3,
         useCORS: true,
         backgroundColor: '#ffffff',
-        width: element.offsetWidth,
-        height: element.offsetHeight,
+        width: 794,
+        height: 1123,
+        windowWidth: 794,
+        windowHeight: 1123,
+        x: 0,
+        y: 0,
         scrollX: 0,
-        scrollY: -window.scrollY,
-        windowWidth: element.offsetWidth,
-        windowHeight: element.offsetHeight
+        scrollY: 0,
+        onclone: (clonedDoc) => {
+          const clonedElement = clonedDoc.getElementById('invoice-preview');
+          if (clonedElement) {
+            clonedElement.style.width = '794px';
+            clonedElement.style.height = '1123px';
+            clonedElement.style.padding = '40px';
+            clonedElement.style.margin = '0';
+          }
+        }
       });
       
       const link = document.createElement('a');
@@ -111,6 +142,7 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
     } catch (error) {
       console.error('PNG Export failed:', error);
     } finally {
+      window.scrollTo(0, scrollPos);
       setIsExporting(null);
       setIsPrintMode(wasPrintMode);
     }
@@ -220,7 +252,7 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
                 className={cn(
                   "transition-all duration-300 flex flex-col shrink-0",
                   isPrintMode 
-                    ? "bg-white text-slate-900 p-[15mm] w-[210mm] h-[297mm] shadow-none rounded-none overflow-hidden" 
+                    ? "bg-white text-slate-900 p-10 w-[794px] h-[1123px] shadow-none rounded-none overflow-hidden" 
                     : "bg-white/[0.02] text-white border border-white/[0.08] p-8 md:p-16 rounded-[3rem] shadow-2xl min-h-[1123px] backdrop-blur-3xl w-full"
                 )}
               >
