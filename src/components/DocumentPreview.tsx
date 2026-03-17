@@ -51,12 +51,12 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
         scale: 2,
         useCORS: true,
         backgroundColor: '#ffffff',
-        width: 794,
-        height: 1123,
+        width: element.offsetWidth,
+        height: element.offsetHeight,
         scrollX: 0,
         scrollY: -window.scrollY,
-        windowWidth: 794,
-        windowHeight: 1123
+        windowWidth: element.offsetWidth,
+        windowHeight: element.offsetHeight
       });
       
       const imgData = canvas.toDataURL('image/png', 1.0);
@@ -96,12 +96,12 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
         scale: 3,
         useCORS: true,
         backgroundColor: '#ffffff',
-        width: 794,
-        height: 1123,
+        width: element.offsetWidth,
+        height: element.offsetHeight,
         scrollX: 0,
         scrollY: -window.scrollY,
-        windowWidth: 794,
-        windowHeight: 1123
+        windowWidth: element.offsetWidth,
+        windowHeight: element.offsetHeight
       });
       
       const link = document.createElement('a');
@@ -220,7 +220,7 @@ export default function DocumentPreview({ doc, onEdit, onBack, onConvert }: Docu
                 className={cn(
                   "transition-all duration-300 flex flex-col shrink-0",
                   isPrintMode 
-                    ? "bg-white text-slate-900 p-10 w-[794px] h-[1123px] shadow-none rounded-none overflow-hidden" 
+                    ? "bg-white text-slate-900 p-[15mm] w-[210mm] h-[297mm] shadow-none rounded-none overflow-hidden" 
                     : "bg-white/[0.02] text-white border border-white/[0.08] p-8 md:p-16 rounded-[3rem] shadow-2xl min-h-[1123px] backdrop-blur-3xl w-full"
                 )}
               >
