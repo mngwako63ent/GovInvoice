@@ -37,8 +37,8 @@ import DocumentForm from './components/DocumentForm';
 import DocumentPreview from './components/DocumentPreview';
 
 const INITIAL_COMPANY = {
-  name: 'GovInvoice Solutions',
-  email: 'hello@govinvoice.co.za',
+  name: 'GovLead Solutions',
+  email: 'hello@govlead.co.za',
   address: '123 Tech Avenue, Sandton, Johannesburg',
   phone: '+27 11 123 4567',
 };
@@ -96,6 +96,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'paid' | 'pending' | 'quotation'>('all');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
 
   const showNotification = (msg: string) => {
@@ -175,56 +176,70 @@ export default function App() {
     });
   }, [documents, searchQuery, filter]);
 
-  const SidebarContent = () => (
+  const SidebarContent = ({ collapsed = false }: { collapsed?: boolean }) => (
     <>
-      <div className="p-8 flex items-center gap-4">
-        <div className="w-12 h-12 bg-white/[0.05] border border-white/[0.1] rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-xl">
+      <div className={cn("p-6 flex items-center gap-4 overflow-hidden", collapsed ? "justify-center" : "")}>
+        <div className="w-12 h-12 bg-white/[0.05] border border-white/[0.1] rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-xl shrink-0">
           <FileText className="text-white" size={24} />
         </div>
-        <h1 className="text-xl font-black tracking-tighter uppercase">GovInvoice</h1>
+        {!collapsed && (
+          <h1 className="text-xl font-black tracking-tighter uppercase transition-opacity duration-300">GovLead</h1>
+        )}
       </div>
 
-      <nav className="flex-1 px-4 space-y-3">
+      <nav className="flex-1 px-3 space-y-2">
         <button 
           onClick={() => {
             setView('dashboard');
-            setIsSidebarOpen(false);
+            if (window.innerWidth < 1024) setIsSidebarOpen(false);
           }}
           className={cn(
-            "w-full flex items-center gap-4 px-6 py-4 rounded-full transition-all font-bold text-sm tracking-wide",
-            view === 'dashboard' ? "bg-white/[0.08] text-white border border-white/[0.1] shadow-xl" : "text-slate-500 hover:text-white"
+            "w-full flex items-center gap-4 px-4 py-4 rounded-full transition-all font-bold text-sm tracking-wide group",
+            view === 'dashboard' ? "bg-white/[0.08] text-white border border-white/[0.1] shadow-xl" : "text-slate-500 hover:text-white",
+            collapsed ? "justify-center px-0" : ""
           )}
+          title="Dashboard"
         >
-          <LayoutDashboard size={20} />
-          <span>Dashboard</span>
+          <LayoutDashboard size={20} className="shrink-0" />
+          {!collapsed && <span className="transition-opacity duration-300">Dashboard</span>}
         </button>
         <button 
           onClick={() => {
             setSelectedDoc(null);
             setView('create');
-            setIsSidebarOpen(false);
+            if (window.innerWidth < 1024) setIsSidebarOpen(false);
           }}
           className={cn(
-            "w-full flex items-center gap-4 px-6 py-4 rounded-full transition-all font-bold text-sm tracking-wide",
-            view === 'create' ? "bg-white/[0.08] text-white border border-white/[0.1] shadow-xl" : "text-slate-500 hover:text-white"
+            "w-full flex items-center gap-4 px-4 py-4 rounded-full transition-all font-bold text-sm tracking-wide group",
+            view === 'create' ? "bg-white/[0.08] text-white border border-white/[0.1] shadow-xl" : "text-slate-500 hover:text-white",
+            collapsed ? "justify-center px-0" : ""
           )}
+          title="Create New"
         >
-          <Plus size={20} />
-          <span>Create New</span>
+          <Plus size={20} className="shrink-0" />
+          {!collapsed && <span className="transition-opacity duration-300">Create New</span>}
         </button>
       </nav>
 
-      <div className="p-4 mt-auto border-t border-white/5">
-        <div className="flex items-center gap-3 p-4 rounded-3xl bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.08] cursor-pointer transition-all">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-lg">
+      <div className="p-3 mt-auto border-t border-white/5">
+        <button 
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className={cn(
+            "w-full flex items-center gap-4 p-3 rounded-2xl bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.08] cursor-pointer transition-all overflow-hidden",
+            collapsed ? "justify-center" : ""
+          )}
+        >
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-lg shrink-0">
             MN
           </div>
-          <div className="flex-1 overflow-hidden">
-            <p className="text-sm font-bold truncate">M. Ngwako</p>
-            <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black truncate">Admin</p>
-          </div>
-          <LogOut size={16} className="text-slate-500" />
-        </div>
+          {!collapsed && (
+            <div className="flex-1 text-left transition-opacity duration-300">
+              <p className="text-sm font-bold truncate">M. Ngwako</p>
+              <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black truncate">Admin</p>
+            </div>
+          )}
+          {!collapsed && <ChevronRight className={cn("text-slate-500 transition-transform duration-300", isSidebarOpen ? "rotate-180" : "rotate-0")} size={16} />}
+        </button>
       </div>
     </>
   );
@@ -244,12 +259,15 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex w-72 glass-card m-4 mr-0 flex-col z-30 overflow-hidden">
-        <SidebarContent />
+      {/* Sidebar - Desktop & Tablet */}
+      <aside className={cn(
+        "hidden md:flex glass-card m-4 mr-0 flex-col z-30 overflow-hidden transition-all duration-300",
+        isSidebarOpen ? "w-72" : "w-24"
+      )}>
+        <SidebarContent collapsed={!isSidebarOpen} />
       </aside>
 
-      {/* Sidebar - Mobile */}
+      {/* Sidebar - Mobile Drawer */}
       <motion.aside 
         initial={{ x: -300 }}
         animate={{ x: isSidebarOpen ? 0 : -300 }}
@@ -262,15 +280,15 @@ export default function App() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden relative">
         {/* Header */}
-        <header className="h-20 flex items-center justify-between px-4 lg:px-8 shrink-0">
+        <header className="h-20 flex items-center justify-between px-4 md:px-8 shrink-0">
           <div className="flex items-center gap-4 flex-1">
             <button 
-              onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden p-2 glass-button"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="p-3 glass-button lg:hidden"
             >
               <MoreVertical size={20} />
             </button>
-            <div className="relative w-full max-w-md hidden sm:block">
+            <div className="relative w-full max-w-md hidden md:block">
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
               <input 
                 type="text" 
@@ -280,6 +298,12 @@ export default function App() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
+            <button 
+              onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+              className={cn("p-3 glass-button md:hidden", isMobileSearchOpen ? "bg-white/10" : "")}
+            >
+              <Search size={20} />
+            </button>
           </div>
           
           <div className="flex items-center gap-2 lg:gap-4">
@@ -319,18 +343,28 @@ export default function App() {
         </AnimatePresence>
 
         {/* Mobile Search Bar */}
-        <div className="px-4 pb-4 sm:hidden">
-          <div className="relative w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search documents..."
-              className="w-full glass-input pl-12"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </div>
+        <AnimatePresence>
+          {isMobileSearchOpen && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="px-4 pb-4 md:hidden overflow-hidden"
+            >
+              <div className="relative w-full">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                <input 
+                  type="text" 
+                  placeholder="Search documents..."
+                  className="w-full glass-input pl-12"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoFocus
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto p-4 lg:p-8 lg:pt-0">

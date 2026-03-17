@@ -82,22 +82,22 @@ export default function Dashboard({
   return (
     <div className="space-y-8">
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map((stat) => (
           <button 
             key={stat.id} 
             onClick={() => onFilter?.(stat.id as any)}
             className={cn(
-              "glass-card p-4 sm:p-6 flex items-center gap-3 sm:gap-4 text-left transition-all hover:scale-[1.02] active:scale-[0.98] rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden min-w-0",
+              "glass-card p-5 md:p-6 flex items-center gap-4 text-left transition-all hover:scale-[1.02] active:scale-[0.98] rounded-[2rem] md:rounded-[2.5rem] overflow-hidden min-w-0",
               activeFilter === stat.id ? "ring-2 ring-white/20 bg-white/[0.08]" : "hover:bg-white/[0.04]"
             )}
           >
-            <div className={cn("p-3 sm:p-4 rounded-full bg-white/[0.03] border border-white/[0.05] shrink-0", stat.color)}>
-              <stat.icon size={20} className="sm:w-6 sm:h-6" />
+            <div className={cn("p-3 md:p-4 rounded-full bg-white/[0.03] border border-white/[0.05] shrink-0", stat.color)}>
+              <stat.icon size={20} className="md:w-6 md:h-6" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[9px] sm:text-[10px] text-slate-500 font-black uppercase tracking-widest truncate">{stat.label}</p>
-              <p className="text-lg sm:text-2xl font-bold truncate leading-tight">{stat.value}</p>
+              <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest truncate">{stat.label}</p>
+              <p className="text-xl md:text-2xl font-bold truncate leading-tight">{stat.value}</p>
             </div>
           </button>
         ))}
@@ -109,23 +109,23 @@ export default function Dashboard({
           <h2 className="text-lg font-bold">Recent Documents</h2>
           <button 
             onClick={onViewAll}
-            className="text-sm text-blue-500 hover:text-blue-400 font-medium"
+            className="text-sm text-blue-500 hover:text-blue-400 font-medium px-4 py-2 hover:bg-blue-500/5 rounded-full transition-colors"
           >
             View All
           </button>
         </div>
         
-        {/* Desktop Table */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        {/* Desktop & Tablet Table */}
+        <div className="hidden sm:block overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[600px]">
             <thead>
-              <tr className="text-slate-500 text-sm border-b border-white/5">
-                <th className="px-6 py-4 font-medium">Document</th>
-                <th className="px-6 py-4 font-medium">Client</th>
-                <th className="px-6 py-4 font-medium">Date</th>
-                <th className="px-6 py-4 font-medium">Amount</th>
-                <th className="px-6 py-4 font-medium">Status</th>
-                <th className="px-6 py-4 font-medium text-right">Actions</th>
+              <tr className="text-slate-500 text-[10px] font-black uppercase tracking-widest border-b border-white/5">
+                <th className="px-6 py-4">Document</th>
+                <th className="px-6 py-4">Client</th>
+                <th className="px-6 py-4 hidden lg:table-cell">Date</th>
+                <th className="px-6 py-4">Amount</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
@@ -153,10 +153,10 @@ export default function Dashboard({
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="font-medium text-sm">{doc.client.name}</p>
-                      <p className="text-xs text-slate-500">{doc.client.email}</p>
+                      <p className="font-medium text-sm truncate max-w-[150px]">{doc.client.name}</p>
+                      <p className="text-xs text-slate-500 truncate max-w-[150px]">{doc.client.email}</p>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-400">
+                    <td className="px-6 py-4 text-sm text-slate-400 hidden lg:table-cell">
                       {doc.issueDate}
                     </td>
                     <td className="px-6 py-4 font-bold text-sm">
@@ -166,7 +166,7 @@ export default function Dashboard({
                       <StatusBadge status={doc.status} />
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center justify-end gap-1 md:gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button 
                           onClick={() => onPreview(doc)}
                           className="p-2 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-colors"
@@ -214,7 +214,7 @@ export default function Dashboard({
         </div>
 
         {/* Mobile List */}
-        <div className="md:hidden divide-y divide-white/5">
+        <div className="sm:hidden divide-y divide-white/5">
           {documents.length === 0 ? (
             <div className="px-6 py-12 text-center text-slate-500">
               No documents found.
